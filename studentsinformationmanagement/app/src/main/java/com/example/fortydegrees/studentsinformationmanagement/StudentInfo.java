@@ -203,5 +203,4 @@ public class StudentInfo extends AppCompatActivity {
         dialog.setMessage(message);
         dialog.show();
     }
-
 }

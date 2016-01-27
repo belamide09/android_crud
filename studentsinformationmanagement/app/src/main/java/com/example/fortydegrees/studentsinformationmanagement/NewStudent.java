@@ -136,7 +136,11 @@ public class NewStudent extends AppCompatActivity {
                     JSONObject json = new JSONObject(response);
                     Boolean result = Boolean.valueOf(json.getString("result").toString());
                     if (result) {
-                        AlertMessage("Sucess", "Successfully added new student");
+                        name.setText("");
+                        course.setText("");
+                        yr_level.setText("");
+                        img_string = "";
+                        new LoadImage().execute("http://10.0.2.2/img/emptyprofile.jpg");
 
                         AlertDialog.Builder dialog = new AlertDialog.Builder(NewStudent.this);
                         dialog.setTitle("Confirmation");
@@ -176,10 +180,10 @@ public class NewStudent extends AppCompatActivity {
     DialogInterface.OnClickListener redirectConfirmation = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            if(which == DialogInterface.BUTTON_POSITIVE){
-                Intent intent = new Intent(NewStudent.this,MainActivity.class);
-                startActivity(intent);
-            }
+        if(which == DialogInterface.BUTTON_POSITIVE){
+            Intent intent = new Intent(NewStudent.this,MainActivity.class);
+            startActivity(intent);
+        }
         }
     };
 
