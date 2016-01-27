@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.SSLCertificateSocketFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,6 +29,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -234,23 +237,26 @@ public class NewStudent extends AppCompatActivity {
         InputStream is = null;
         HttpURLConnection conn = null;
         try {
-            AlertMessage("Test","Test");
             //constants
-            URL url = new URL("http://10.0.2.2/add_test.php");
+            URL url = new URL("https://english.fdc-inc.com/api/users/update");
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("name", "JACOB1");
-            jsonObject.put("course", "JACOB1");
-            jsonObject.put("yr_level", "JACOB1");
-            jsonObject.put("image", "JACOB1");
+            jsonObject.put("users_api_token", "1234567890");
+            jsonObject.put("users_username", "test");
             String message = jsonObject.toString();
 
             conn = (HttpURLConnection) url.openConnection();
-            conn.setReadTimeout(10000 /*milliseconds*/);
-            conn.setConnectTimeout(15000 /* milliseconds */);
+            conn.setReadTimeout(10000);
+            conn.setConnectTimeout(15000);
             conn.setRequestMethod("POST");
             conn.setDoInput(true);
             conn.setDoOutput(true);
             conn.setFixedLengthStreamingMode(message.getBytes().length);
+
+            if (conn instanceof HttpsURLConnection) {
+                HttpsURLConnection httpsConn = (HttpsURLConnection) conn;
+                httpsConn.setSSLSocketFactory(SSLCertificateSocketFactory.getInsecure(0, null));
+                httpsConn.setHostnameVerifier(new AllowAllHostnameVerifier());
+            }
 
             //make some HTTP header nicety
             conn.setRequestProperty("Content-Type", "application/json;charset=utf-8");
@@ -264,10 +270,7 @@ public class NewStudent extends AppCompatActivity {
             os.write(message.getBytes());
             //clean upg
             os.flush();
-
-            name = (EditText) findViewById(R.id.txt_name);
-
-            //do somehting with response
+            //do something with response
             is = conn.getInputStream();
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
@@ -276,9 +279,7 @@ public class NewStudent extends AppCompatActivity {
             while((line = reader.readLine()) != null) {
                 result.append(line);
             }
-
-            JSONObject json_result = new JSONObject(result.toString());
-
+            AlertMessage("Result",result.toString());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JSONException e) {
