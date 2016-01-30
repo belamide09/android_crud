@@ -79,6 +79,8 @@ public class NewStudent extends AppCompatActivity {
         student_image = (ImageView) findViewById(R.id.student_image);
         add_student = (Button) findViewById(R.id.update_student);
 
+
+
         new LoadImage().execute("http://10.0.2.2/img/emptyprofile.jpg");
     }
 
