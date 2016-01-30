@@ -36,7 +36,7 @@
                 <EditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/editText"
+                    android:id="@+id/room_name"
                     android:layout_gravity="left|center_vertical"
                     android:hint="Enter room name"
                     android:layout_marginRight="120dp"/>
@@ -46,7 +46,8 @@
                     android:layout_height="wrap_content"
                     android:text="Create Room"
                     android:id="@+id/create_room"
-                    android:layout_gravity="right|center_vertical" />
+                    android:layout_gravity="right|center_vertical"
+                    android:onClick="CreateRoom"/>
 
             </FrameLayout>
 
@@ -64,7 +65,9 @@
                     android:orientation="vertical"
                     android:id="@+id/table_rooms"
                     android:padding="5dp"
-                    android:stretchColumns="10dp"></TableLayout>
+                    android:stretchColumns="10dp">
+
+                </TableLayout>
             </FrameLayout>
 
         </FrameLayout>
