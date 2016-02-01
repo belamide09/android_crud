@@ -2,6 +2,7 @@ package com.example.fortydegrees.chatapplication;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -40,13 +41,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
+import java.util.Random;
 
 import android.widget.RelativeLayout.LayoutParams;
 
 public class ChatRoom extends AppCompatActivity {
 
     TableLayout table;
-    int user_id = 1;
+    int user_id;
     JSONObject selected_room;
     TableRow selected_row;
     EditText room_name;
@@ -62,6 +64,10 @@ public class ChatRoom extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        Random r = new Random();
+        user_id = r.nextInt(1000);
+
         this.setTitle("Chat Room List");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_room);
@@ -76,6 +82,7 @@ public class ChatRoom extends AppCompatActivity {
         mSocket.on("responseJoinRoom", responseJoinRoom);
         mSocket.on("responseCreateRoom", responseCreateRoom);
         mSocket.on("AppendRoom", AppendRoomListener);
+        mSocket.on("RemoveRoom", RemoveRoomListener);
         GetRooms();
     }
 
@@ -146,7 +153,7 @@ public class ChatRoom extends AppCompatActivity {
                     JSONObject room = new JSONObject(result.getJSONObject("result").toString());
                     RedirectToChat(room);
                 }else{
-                    AlertMessage("Error","Failed to join the selected room");
+                    AlertMessage("Error", "Failed to join the selected room");
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -170,6 +177,19 @@ public class ChatRoom extends AppCompatActivity {
         }
     };
 
+    private Emitter.Listener RemoveRoomListener = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+        try {
+            JSONObject room = new JSONObject(args[0].toString());
+            RemoveRoom(Integer.valueOf(room.getString("id")));
+        } catch (JSONException e) {
+            Log.d("error",e.getMessage());
+            e.printStackTrace();
+        }
+        }
+    };
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private void displayRooms(JSONArray students) throws JSONException {
         table.removeAllViews();
@@ -179,6 +199,7 @@ public class ChatRoom extends AppCompatActivity {
 
             final TableRow row = new TableRow(ChatRoom.this);;
             row.setPadding(20, 20, 20, 20);
+            row.setId(Integer.valueOf(room.getString("id")));
 
             TextView name = new TextView(ChatRoom.this);
             name.setWidth(600);
@@ -195,14 +216,14 @@ public class ChatRoom extends AppCompatActivity {
             join.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v) {
-                    selected_row = row;
-                    selected_room = room;
-                    AlertDialog.Builder dialog = new AlertDialog.Builder(ChatRoom.this);
-                    dialog.setTitle("Confirmation");
-                    dialog.setMessage("Are you sure you want to join this room");
-                    dialog.setPositiveButton("Yes", joinRoomConfirmation);
-                    dialog.setNegativeButton("No", joinRoomConfirmation);
-                    dialog.show();
+                selected_row = row;
+                selected_room = room;
+                AlertDialog.Builder dialog = new AlertDialog.Builder(ChatRoom.this);
+                dialog.setTitle("Confirmation");
+                dialog.setMessage("Are you sure you want to join this room");
+                dialog.setPositiveButton("Yes", joinRoomConfirmation);
+                dialog.setNegativeButton("No", joinRoomConfirmation);
+                dialog.show();
                 }
             });
 
@@ -215,14 +236,14 @@ public class ChatRoom extends AppCompatActivity {
     DialogInterface.OnClickListener joinRoomConfirmation = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            if (which == DialogInterface.BUTTON_POSITIVE){
-                try {
-                    selected_room.put("user_id", user_id);
-                    mSocket.emit("join_room", selected_room);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+        if (which == DialogInterface.BUTTON_POSITIVE){
+            try {
+                selected_room.put("user_id", user_id);
+                mSocket.emit("join_room", selected_room);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
+        }
         }
     };
 
@@ -254,44 +275,45 @@ public class ChatRoom extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    table = (TableLayout)findViewById(R.id.table_rooms);
+            try {
+                table = (TableLayout)findViewById(R.id.table_rooms);
 
-                    final TableRow row = new TableRow(ChatRoom.this);
-                    row.setPadding(20, 20, 20, 20);
+                final TableRow row = new TableRow(ChatRoom.this);
+                row.setPadding(20, 20, 20, 20);
+                row.setId(Integer.valueOf(room.getString("id")));
 
-                    TextView name = new TextView(ChatRoom.this);
-                    name.setWidth(600);
-                    name.setPadding(10, 0, 10, 0);
-                    name.setText(room.getString("room_name"));
-                    TextView join = new TextView(ChatRoom.this);
-                    join.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                    join.setBackgroundColor(Color.parseColor("#ffffff"));
-                    join.setPadding(5, 5, 5, 5);
-                    join.setWidth(200);
-                    join.setText("Join");
+                TextView name = new TextView(ChatRoom.this);
+                name.setWidth(600);
+                name.setPadding(10, 0, 10, 0);
+                name.setText(room.getString("room_name"));
+                TextView join = new TextView(ChatRoom.this);
+                join.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                join.setBackgroundColor(Color.parseColor("#ffffff"));
+                join.setPadding(5, 5, 5, 5);
+                join.setWidth(200);
+                join.setText("Join");
 
-                    join.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            selected_row = row;
-                            selected_room = room;
-                            AlertDialog.Builder dialog = new AlertDialog.Builder(ChatRoom.this);
-                            dialog.setTitle("Confirmation");
-                            dialog.setMessage("Are you sure you want to join this room");
-                            dialog.setPositiveButton("Yes", joinRoomConfirmation);
-                            dialog.setNegativeButton("No", joinRoomConfirmation);
-                            dialog.show();
-                        }
-                    });
+                join.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                    selected_row = row;
+                    selected_room = room;
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(ChatRoom.this);
+                    dialog.setTitle("Confirmation");
+                    dialog.setMessage("Are you sure you want to join this room");
+                    dialog.setPositiveButton("Yes", joinRoomConfirmation);
+                    dialog.setNegativeButton("No", joinRoomConfirmation);
+                    dialog.show();
+                    }
+                });
 
-                    row.addView(name);
-                    row.addView(join);
+                row.addView(name);
+                row.addView(join);
 
-                    table.addView(row);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                table.addView(row);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             }
         });
     }
@@ -300,6 +322,22 @@ public class ChatRoom extends AppCompatActivity {
         Intent intent = new Intent(ChatRoom.this, Chat.class);
         intent.putExtra("room", room.toString());
         startActivity(intent);
+    }
+
+    private void RemoveRoom(int id){
+        for(int x = 0;x < table.getChildCount();x++){
+           final TableRow row = (TableRow)table.getChildAt(x);
+            Log.d("Room",Integer.toString(row.getId())+" == "+Integer.toString(id));
+            if (row.getId() == id) {
+                Log.d("Selected Room", Integer.toString(id));
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        table.removeView(row);
+                    }
+                });
+            }
+        }
     }
 
 
