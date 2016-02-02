@@ -17,21 +17,23 @@
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true">
+        android:layout_alignParentEnd="true"
+        android:id="@+id/frameLayout">
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="right|top"
-            android:layout_marginBottom="70dp">
+            android:layout_marginBottom="70dp"
+            android:background="#c0bbbb">
 
-            <ScrollView
+            <TableLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/scrollView"
                 android:layout_gravity="left|top"
-                android:background="#c1c1c1"
-                android:fillViewport="false" />
+                android:orientation="vertical"
+                android:id="@+id/conversations"
+                android:padding="10dp"></TableLayout>
         </FrameLayout>
 
         <FrameLayout
@@ -43,7 +45,7 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/editText"
+                android:id="@+id/txt_message"
                 android:layout_gravity="left|top"
                 android:layout_marginRight="100dp"/>
 
@@ -51,8 +53,10 @@
                 android:layout_width="96dp"
                 android:layout_height="wrap_content"
                 android:text="Send"
-                android:id="@+id/button"
-                android:layout_gravity="right|top" />
+                android:id="@+id/send_message"
+                android:layout_gravity="right|top"
+                android:onClick="SendMessage"/>
         </FrameLayout>
     </FrameLayout>
+
 </RelativeLayout>

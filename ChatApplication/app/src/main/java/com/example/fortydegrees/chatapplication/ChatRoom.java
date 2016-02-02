@@ -184,7 +184,6 @@ public class ChatRoom extends AppCompatActivity {
             JSONObject room = new JSONObject(args[0].toString());
             RemoveRoom(Integer.valueOf(room.getString("id")));
         } catch (JSONException e) {
-            Log.d("error",e.getMessage());
             e.printStackTrace();
         }
         }
@@ -327,9 +326,7 @@ public class ChatRoom extends AppCompatActivity {
     private void RemoveRoom(int id){
         for(int x = 0;x < table.getChildCount();x++){
            final TableRow row = (TableRow)table.getChildAt(x);
-            Log.d("Room",Integer.toString(row.getId())+" == "+Integer.toString(id));
             if (row.getId() == id) {
-                Log.d("Selected Room", Integer.toString(id));
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
