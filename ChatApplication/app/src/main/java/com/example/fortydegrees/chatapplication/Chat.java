@@ -31,6 +31,7 @@ import java.util.Random;
 
 public class Chat extends AppCompatActivity {
 
+    int user_id;
     JSONObject current_room;
     EditText txt_message;
     Socket mSocket;
@@ -61,6 +62,8 @@ public class Chat extends AppCompatActivity {
         }
 
         Bundle bundle = getIntent().getExtras();
+
+        user_id = bundle.getInt("room");
         try {
             current_room = new JSONObject(bundle.getString("room"));
             this.setTitle(current_room.getString("room_name"));
@@ -77,9 +80,13 @@ public class Chat extends AppCompatActivity {
 
     public void SendMessage(View view) {
         try {
+
+            String to = Integer.valueOf(current_room.getString("user_1")) == user_id ? current_room.getString("user_2_socket") : current_room.getString("user_1_socket");
+
             JSONObject message = new JSONObject();
             message.put("message",txt_message.getText());
             message.put("user",user);
+            message.put("to",to);
             mSocket.emit("send_message", message);
             txt_message.setText("");
         } catch (JSONException e) {

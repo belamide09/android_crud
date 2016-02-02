@@ -319,6 +319,7 @@ public class ChatRoom extends AppCompatActivity {
 
     private void RedirectToChat(JSONObject room){
         Intent intent = new Intent(ChatRoom.this, Chat.class);
+        intent.putExtra("user_id", user_id);
         intent.putExtra("room", room.toString());
         startActivity(intent);
     }
