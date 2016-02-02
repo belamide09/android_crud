@@ -31,6 +31,7 @@ import java.util.Random;
 
 public class Chat extends AppCompatActivity {
 
+    JSONObject current_room;
     EditText txt_message;
     Socket mSocket;
     JSONObject user;
@@ -61,8 +62,8 @@ public class Chat extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
         try {
-            JSONObject room = new JSONObject(bundle.getString("room"));
-            this.setTitle(room.getString("room_name"));
+            current_room = new JSONObject(bundle.getString("room"));
+            this.setTitle(current_room.getString("room_name"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -70,6 +71,7 @@ public class Chat extends AppCompatActivity {
         conversations = (TableLayout)findViewById(R.id.conversations);
         txt_message = (EditText)findViewById(R.id.txt_message);
 
+        mSocket.on("UpdateRoom",UpdateRoom);
         mSocket.on("ReceiveMessage",ReceiveMessage);
     }
 
@@ -86,6 +88,20 @@ public class Chat extends AppCompatActivity {
     }
 
     // Event listener
+
+    private Emitter.Listener UpdateRoom = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject room = (JSONObject)args[0];
+            try {
+                if ( room.getString("id").toString() == current_room.getString("id").toString() ){
+                    current_room = room;
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    };
 
     private Emitter.Listener ReceiveMessage = new Emitter.Listener() {
         @Override
